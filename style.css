@@ -100,6 +100,28 @@ button:hover {
     transform: translateY(-2px);
 }
 
+.done-btn {
+    background: #10b981;
+}
+
+.done-btn:hover {
+    background: #059669;
+}
+
+.delete-btn {
+    background: #ef4444;
+}
+
+.delete-btn:hover {
+    background: #dc2626;
+}
+
+.task-card.completed {
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    opacity: 0.85;
+}
+
 .tasks-container {
     background: white;
     padding: 25px;

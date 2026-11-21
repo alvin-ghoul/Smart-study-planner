@@ -10,6 +10,7 @@ const minutesInput = document.getElementById("minutes-input");
 const taskList = document.getElementById("task-list");
 const taskCount = document.getElementById("task-count");
 const totalMinutes = document.getElementById("total-minutes");
+const completedCount = document.getElementById("completed-count");
 
 // 3. Load saved tasks from localStorage
 const tasks = JSON.parse(localStorage.getItem("studyTasks")) || [];
@@ -23,14 +24,14 @@ function saveTasks() {
 studyForm.addEventListener("submit", function(e) {
 
     e.preventDefault();
-    console.log("Hello")
 
     const newTask = {
         id: Date.now(),
-        subject: subjectInput.value,
-        task: taskInput.value,
+        subject: subjectInput.value.trim(),
+        task: taskInput.value.trim(),
         priority: priorityInput.value,
-        minutes: Number(minutesInput.value)
+        minutes: Number(minutesInput.value),
+        completed: false
     };
 
     tasks.push(newTask);
@@ -42,7 +43,28 @@ studyForm.addEventListener("submit", function(e) {
     renderTasks();
 });
 
-// 6. Delete a finished task
+// 6. Toggle task completion status (mark as done / pending)
+function toggleTask(id) {
+
+    // Find the clicked task
+    const task = tasks.find(function(t) {
+        return t.id === id;
+    });
+
+    if (task) {
+        // Toggle the completed boolean
+        task.completed = !task.completed;
+
+        // Save and re-render the task list
+        saveTasks();
+        renderTasks();
+    }
+}
+
+// Alias toggleComplete for convenience
+const toggleComplete = toggleTask;
+
+// 7. Delete a task permanently
 function deleteTask(id) {
 
     // Remove the selected task
@@ -60,23 +82,38 @@ function deleteTask(id) {
     renderTasks();
 }
 
-// 7. Display study tasks
+// 8. Display study tasks
 function renderTasks() {
 
     // Clear the task list
     taskList.innerHTML = "";
 
-    // Update the number of remaining tasks
-    taskCount.textContent = tasks.length;
+    // Filter remaining (not completed) tasks
+    const remainingTasks = tasks.filter(function(task) {
+        return !task.completed;
+    });
 
-    // Calculate total study minutes
-    const total = tasks.reduce(function(sum, task) {
+    // Filter completed tasks
+    const doneTasks = tasks.filter(function(task) {
+        return Boolean(task.completed);
+    });
+
+    // Update the number of remaining tasks
+    taskCount.textContent = remainingTasks.length;
+
+    // Update completed tasks count if element exists
+    if (completedCount) {
+        completedCount.textContent = doneTasks.length;
+    }
+
+    // Calculate total study minutes for remaining tasks
+    const total = remainingTasks.reduce(function(sum, task) {
         return sum + task.minutes;
     }, 0);
 
     totalMinutes.textContent = total;
 
-    // Show a message if there are no tasks
+    // Show a message if there are no tasks at all
     if (tasks.length === 0) {
 
         taskList.innerHTML = "<p>All caught up! No homework pending.</p>";
@@ -86,13 +123,17 @@ function renderTasks() {
         // Display every task
         tasks.forEach(function(task) {
 
+            const isDone = Boolean(task.completed);
             const card = document.createElement("div");
+            card.className = isDone ? "task-card completed" : "task-card";
 
-            card.style.background = "#f8fafc";
+            card.style.background = isDone ? "#f1f5f9" : "#f8fafc";
             card.style.padding = "20px";
             card.style.borderRadius = "12px";
-            card.style.border = "1px solid #e2e8f0";
+            card.style.border = isDone ? "1px solid #cbd5e1" : "1px solid #e2e8f0";
             card.style.marginBottom = "10px";
+            card.style.opacity = isDone ? "0.85" : "1";
+            card.style.transition = "all 0.2s ease";
 
             // Choose priority color
             let priorityColor;
@@ -109,27 +150,49 @@ function renderTasks() {
 
             // Create the task card content
             card.innerHTML = `
-                <h3>${task.subject}</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <h3 style="${isDone ? 'text-decoration: line-through; color: #64748b;' : ''}">
+                        ${task.subject}
+                    </h3>
 
-                <p>${task.task}</p>
+                    <span style="background: ${isDone ? '#10b981' : '#6366f1'}; color: white; padding: 3px 10px; border-radius: 9999px; font-size: 12px; font-weight: bold;">
+                        ${isDone ? "✓ Done" : "Pending"}
+                    </span>
+                </div>
 
-                <p>⏱️ ${task.minutes} minutes</p>
+                <p style="${isDone ? 'text-decoration: line-through; color: #64748b;' : ''}; margin-bottom: 8px;">
+                    ${task.task}
+                </p>
 
-                <p>
+                <p style="${isDone ? 'color: #64748b;' : ''}; margin-bottom: 4px;">
+                    ⏱️ ${task.minutes} minutes
+                </p>
+
+                <p style="${isDone ? 'color: #64748b;' : ''}; margin-bottom: 12px;">
                     Priority:
                     <span style="color: ${priorityColor}; font-weight: bold;">
                         ${task.priority}
                     </span>
                 </p>
 
-                <button class="delete-btn">
-                    Done / Delete
-                </button>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="done-btn" style="background: ${isDone ? '#64748b' : '#10b981'}; padding: 10px 16px; font-size: 14px;">
+                        ${isDone ? "↩ Mark as Pending" : "✓ Mark as Done"}
+                    </button>
+
+                    <button class="delete-btn" style="background: #ef4444; padding: 10px 16px; font-size: 14px;">
+                        Delete
+                    </button>
+                </div>
             `;
 
-            // Connect the button to deleteTask()
-            const deleteButton = card.querySelector(".delete-btn");
+            // Connect the buttons to functions
+            const doneButton = card.querySelector(".done-btn");
+            doneButton.addEventListener("click", function() {
+                toggleTask(task.id);
+            });
 
+            const deleteButton = card.querySelector(".delete-btn");
             deleteButton.addEventListener("click", function() {
                 deleteTask(task.id);
             });
@@ -141,6 +204,5 @@ function renderTasks() {
     }
 }
 
-// 8. Load saved tasks when the page opens
+// 9. Load saved tasks when the page opens
 renderTasks();
-

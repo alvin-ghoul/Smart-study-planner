@@ -1,0 +1,91 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Study & Homework Planner</title>
+
+   <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <header>
+            <h1> Smart Study Planner</h1>
+
+            <div class="stats">
+                <p>
+                    Tasks Remaining:
+                    <span id="task-count">0</span>
+                </p>
+
+                <p>
+                    Total Study Time:
+                    <span id="total-minutes">0</span> mins
+                </p>
+            </div>
+        </header>
+
+        <div class="form-container">
+
+            <h2> Add a Study Task</h2>
+
+            <form id="study-form">
+
+                <label for="subject-input">Subject</label>
+                <input
+                    type="text"
+                    id="subject-input"
+                    placeholder="e.g. Math, Science, Coding"
+                    required
+                >
+
+                <label for="task-input">Homework Description</label>
+                <input
+                    type="text"
+                    id="task-input"
+                    placeholder="What do you need to study?"
+                    required
+                >
+
+                <label for="priority-input">Priority</label>
+                <select id="priority-input" required>
+                    <option value="High">High</option>
+                    <option value="Medium" selected>Medium</option>
+                    <option value="Low">Low</option>
+                </select>
+
+                <label for="minutes-input">Estimated Study Minutes</label>
+                <input
+                    type="number"
+                    id="minutes-input"
+                    placeholder="e.g. 30"
+                    min="1"
+                    required
+                >
+
+                <button type="submit">
+                    Save Study Task
+                </button>
+
+            </form>
+
+        </div>
+
+        <div class="tasks-container">
+
+            <h2> My Study Tasks</h2>
+
+            <div id="task-list"></div>
+
+        </div>
+
+    </div>
+
+    <script src="script.js"></script>
+
+</body>
+</html>
